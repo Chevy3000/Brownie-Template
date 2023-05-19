@@ -4,9 +4,6 @@ from brownie import (
     config,
     LinkToken,
     MockV3Aggregator,
-    MockV3AggregatorDAI,
-    MockDai,
-    MockWeth,
     Contract,
     web3,
 )
@@ -26,16 +23,11 @@ BLOCK_CONFIRMATIONS_FOR_VERIFICATION = (
 
 contract_to_mock = {
     "eth_usd_price_feed": MockV3Aggregator,
-    "dai_usd_price_feed": MockV3AggregatorDAI,
-    "dai_token":MockDai,
-    "weth_token": MockWeth,
-    "link_token":LinkToken,
-
+    "link_token": LinkToken,
 }
 
 DECIMALS = 18
 INITIAL_VALUE = web3.toWei(2000, "ether")
-INITIAL_VALUE_DAI = web3.toWei(100, "ether")
 BASE_FEE = 100000000000000000  # The premium
 GAS_PRICE_LINK = 1e9  # Some value calculated depending on the Layer 1 cost and Link
 
@@ -100,7 +92,7 @@ def fund_with_link(
     ### Keep this line to show how it could be done without deploying a mock
     # tx = interface.LinkTokenInterface(link_token.address).transfer(
     #     contract_address, amount, {"from": account}
-    # 
+    #
     tx = link_token.transfer(contract_address, amount, {"from": account})
     print("Funded {}".format(contract_address))
     return tx
@@ -115,17 +107,10 @@ def deploy_mocks(decimals=DECIMALS, initial_value=INITIAL_VALUE):
     account = get_account()
     print("Deploying Mock Link Token...")
     link_token = LinkToken.deploy({"from": account})
-    print("Deploying Mock Weth Token...")
-    weth_token = MockWeth.deploy({"from": account})
-    print("Deploying Mock Dai Token...")
-    dai_token = MockDai.deploy({"from": account})
     print("Deploying Mock Eth Price Feed...")
     mock_price_feed = MockV3Aggregator.deploy(
-        decimals, initial_value, {"from": account})
-    print("Deploying Mock Dai Price Feed...")
-    mock_price_feed_dai = MockV3AggregatorDAI.deploy(
-        decimals, INITIAL_VALUE_DAI, {"from": account})
-
+        decimals, initial_value, {"from": account}
+    )
     print("Mocks Deployed!")
 
 
@@ -144,7 +129,7 @@ def listen_for_event(brownie_contract, event, timeout=200, poll_interval=2):
 
         poll_interval ([int]): How often to call your node to check for events.
         Defaults to 2 seconds.
-    """ 
+    """
     web3_contract = web3.eth.contract(
         address=brownie_contract.address, abi=brownie_contract.abi
     )
